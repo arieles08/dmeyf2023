@@ -8,7 +8,7 @@ require(stats)
 #--FE------------------------------------------------------------------------
 #Agregar el FE mensual
 Add_FE  <- function( dataset )
- {
+{
   gc()
   # Corrige clientes con menos de 90 dias de antiguedad (al ser una medida trimestral)
   #ctrx_quarter_fix
@@ -289,8 +289,8 @@ cols_to_fix <- c("mrentabilidad",
                  "Visa_mpagosdolares",
                  "Visa_mconsumototal",
                  "Visa_mpagominimo"
-                 )
-  
+)
+
 colsFE_to_fix <- c("dist_msaldo_mcaja",
                    "dist_msaldo_mcorriente",
                    "dist_mcaja_mcorriente",
@@ -339,16 +339,16 @@ drift_rank_cero_fijo  <- function( campos_drift )
   }
 }
 
-  
+
 #FUNCION2: FIX Drifting con "Scalado z-score" (Xi - avg / desvio)
 drift_zscale  <- function( campos_drift )
+{
+  for( campo in campos_drift )
   {
-    for( campo in campos_drift )
-    {
-      cat( campo, " " )
-      dataset[, paste0("z_",campo) := scale(get(campo),center = TRUE, scale = TRUE), by= foto_mes]
-    }
-  } 
+    cat( campo, " " )
+    dataset[, paste0("z_",campo) := scale(get(campo),center = TRUE, scale = TRUE), by= foto_mes]
+  }
+} 
 
 
 #FUNCION3: FE hacerle a toda la variable un "escalado z-score"
@@ -397,14 +397,14 @@ drift_deflacion  <- function( campos_monetarios )
 
 #FUNCION5: renombra la columna original
 renamecols_orig <- function(campos_drift) 
+{
+  for( campo in campos_drift )
   {
-    for( campo in campos_drift )
-    {
-      cat( campo, " " )
-      dataset[, paste0("orig_",campo) := get(campo)]
-      dataset[ , (campo) := NULL ]
-    }
-  } 
+    cat( campo, " " )
+    dataset[, paste0("orig_",campo) := get(campo)]
+    dataset[ , (campo) := NULL ]
+  }
+} 
 
 #FUNCION6: eliminar las columnas listadas
 eliminacols  <- function( campos_drift )
@@ -421,7 +421,7 @@ eliminacols  <- function( campos_drift )
 
 #---INICIO: Carga dataset y verifica--------------------------------------------------------  
 #Aqui se debe poner la carpeta de la materia de SU computadora local (el Working Directory)
-setwd("D:\\OneDrive\\! DM en Econ y Fin 2023") 
+setwd("~/buckets/b1")
 
 #cargo el dataset
 dataset <- fread("./datasets/competencia02_fix.csv.gz") 
@@ -468,18 +468,17 @@ dim(dataset)
 
 
 
-  #Si quisiera identificar las columnas que modificamos (en vez de eliminarlas) agregandoles un _orig adelante: renamecols_orig(cols_to_fix_tot )
-  # renamecols_orig(cols_to_fix_tot )
-  
-  #Si quiero ESCALAR con z-score algunas variables, usar la función: escalar_variable( columnas ): agrega variables iniciadas con scale_
-  # escalar_variable( columnas )
+#Si quisiera identificar las columnas que modificamos (en vez de eliminarlas) agregandoles un _orig adelante: renamecols_orig(cols_to_fix_tot )
+# renamecols_orig(cols_to_fix_tot )
+
+#Si quiero ESCALAR con z-score algunas variables, usar la función: escalar_variable( columnas ): agrega variables iniciadas con scale_
+# escalar_variable( columnas )
 
 #---EXPORTA DATABSE GENERADA A .CSV---------
-setwd("D:/OneDrive/! DM en Econ y Fin 2023/datasets/")
+setwd("~/buckets/b1/datasets/")
 
 #EXPORTAMOS a un .CSV
 fwrite( dataset,
         file= "competencia02_FE1_drift.csv.gz",
         sep= "," )
-      
 

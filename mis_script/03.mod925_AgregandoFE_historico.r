@@ -186,13 +186,39 @@ generarlags <- function(dataset, cols_lagueables, lag1 = TRUE, lag2 = TRUE, lag3
 
 #---INICIO: Carga dataset y verifica--------------------------------------------------------  
 #Aqui se debe poner la carpeta de la materia de SU computadora local (el Working Directory)
-setwd("D:\\OneDrive\\! DM en Econ y Fin 2023") 
+setwd("~/buckets/b1")
 
 #cargo el dataset
 dataset <- fread("./datasets/competencia02_FE1_drift.csv.gz") 
 
 # minima exploración por fecha y target
 table(dataset$foto_mes, dataset$clase_ternaria )
+
+#EXTRA: CORREGIR clase_ternaria: quedó "Continua" en 202106 y 202107 para todos los desconocidos:
+#check inicial:
+table(dataset$foto_mes, dataset$clase_ternaria)[28:31,] #Inicio: 202106    910      0   163510 || 202107      0      0   164682
+
+#Marca como "" los valores "Continua" para los meses 202106 y 202107:
+dataset[foto_mes %in% c("202106", "202107") & clase_ternaria == "Continua", clase_ternaria := ""]
+
+#check final:
+table(dataset$foto_mes, dataset$clase_ternaria)[28:31,] 
+
+#EXTRA2:
+#check ini:
+dim(dataset)
+
+#Columnas que quitamos y las que dejamos:
+campos_a_quitar <- colnames(dataset)
+campos_a_quitar <- campos_a_quitar[campos_a_quitar %like% "^(add)"]
+cols_finales <- setdiff(colnames(dataset), campos_a_quitar)
+
+# Filtrar el dataset para conservar solo las columnas deseadas
+dataset <- dataset[, ..cols_finales]
+
+# M las primeras filas del dataset actualizado
+dim(dataset)
+
 
 #-----PROCESO: Applico Funciones para: +FE y fix_Drifting ------------------------------------------------------
 #ordeno el dataset para aplicar luego los fixes
@@ -211,17 +237,95 @@ length(cols_lagueables) #370
 #FUNCION1: Genera TENDENCIA y ratioAvg, para ventana de 3, 6 y 9 meses
 TendenciaYmuchomas(dataset, cols_lagueables, ventanas = c(3, 6, 9), tendencia = TRUE, 
                    minimo = FALSE, maximo = FALSE, promedio = FALSE, ratioavg = TRUE, ratiomax = FALSE)
-dim(dataset)
+dim(dataset) #4562810    1402 -> 1399 (sin add_)
 
 
-#FUNCION2: Genera LAGs y DELTA_LAGs, para 1,2,3,4,6,9 y 12.
-generarlags(dataset, cols_lagueables, lag1 = TRUE, lag2 = TRUE, lag3 = TRUE, lag4 = TRUE,
-            lag6 = TRUE, lag9 = TRUE, lag12 = TRUE)
+#FUNCION2: Genera LAGs y DELTA_LAGs, para 1,2,3,4,6,9 y 12. -> cuelga la maquina
+#generarlags(dataset, cols_lagueables, lag1 = TRUE, lag2 = TRUE, lag3 = TRUE, lag4 = FALSE,
+#            lag6 = TRUE, lag9 = FALSE, lag12 = FALSE)
 
-dim(dataset)
+
+
+#LAGs Individuales:
+lag1 <- TRUE
+lag2 <- TRUE
+lag3 <- TRUE
+lag4 <- FALSE
+lag6 <- TRUE
+lag9 <- FALSE
+lag12 <- FALSE
+dim(dataset) #4562810    4359
+
+
+if (lag1) {
+  dataset[ , paste0(cols_lagueables, "_lag1") := shift(.SD, 1, NA, "lag"), 
+           by = numero_de_cliente, 
+           .SDcols = cols_lagueables ]
+  for (vcol in cols_lagueables) {
+    dataset[ , paste0(vcol, "_delta1") := get(vcol) - get(paste0(vcol, "_lag1"))]
+  }
+}
+
+if (lag2) {
+  dataset[ , paste0(cols_lagueables, "_lag2") := shift(.SD, 2, NA, "lag"), 
+           by = numero_de_cliente, 
+           .SDcols = cols_lagueables ]
+  for (vcol in cols_lagueables) {
+    dataset[ , paste0(vcol, "_delta2") := get(vcol) - get(paste0(vcol, "_lag2"))]
+  }
+}
+
+if (lag3) {
+  dataset[ , paste0(cols_lagueables, "_lag3") := shift(.SD, 3, NA, "lag"), 
+           by = numero_de_cliente, 
+           .SDcols = cols_lagueables ]
+  for (vcol in cols_lagueables) {
+    dataset[ , paste0(vcol, "_delta3") := get(vcol) - get(paste0(vcol, "_lag3"))]
+  }
+}
+
+if (lag4) {
+  dataset[ , paste0(cols_lagueables, "_lag4") := shift(.SD, 4, NA, "lag"), 
+           by = numero_de_cliente, 
+           .SDcols = cols_lagueables ]
+  for (vcol in cols_lagueables) {
+    dataset[ , paste0(vcol, "_delta4") := get(vcol) - get(paste0(vcol, "_lag4"))]
+  }
+}
+
+if (lag6) {
+  dataset[ , paste0(cols_lagueables, "_lag6") := shift(.SD, 6, NA, "lag"), 
+           by = numero_de_cliente, 
+           .SDcols = cols_lagueables ]
+  for (vcol in cols_lagueables) {
+    dataset[ , paste0(vcol, "_delta6") := get(vcol) - get(paste0(vcol, "_lag6"))]
+  }
+}
+
+if (lag9) {
+  dataset[ , paste0(cols_lagueables, "_lag9") := shift(.SD, 9, NA, "lag"), 
+           by = numero_de_cliente, 
+           .SDcols = cols_lagueables ]
+  for (vcol in cols_lagueables) {
+    dataset[ , paste0(vcol, "_delta9") := get(vcol) - get(paste0(vcol, "_lag9"))]
+  }
+}
+
+if (lag12) {
+  dataset[ , paste0(cols_lagueables, "_lag12") := shift(.SD, 12, NA, "lag"), 
+           by = numero_de_cliente, 
+           .SDcols = cols_lagueables ]
+  for (vcol in cols_lagueables) {
+    dataset[ , paste0(vcol, "_delta12") := get(vcol) - get(paste0(vcol, "_lag12"))]
+  }
+}
+
+
+
+
 
 #---EXPORTA DATABSE GENERADA A .CSV---------
-setwd("D:/OneDrive/! DM en Econ y Fin 2023/datasets/")
+setwd("~/buckets/b1/datasets/")
 
 #EXPORTAMOS a un .CSV
 fwrite( dataset,

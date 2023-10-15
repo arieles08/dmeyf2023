@@ -11,8 +11,8 @@ fixzerosavg <- function(pcampo, pmeses, dataset) {
   #Creamos tbl obteniendo el valor del mes previo (lag) y siguiente (lead) de la variable (pcampo) para cada cliente.
   tbl <- dataset[  ,  list( "v1" = shift( get(pcampo), 1, type="lag" ),
                             "v2" = shift( get(pcampo), 1, type="lead" )
-          ), 
-          by=numero_de_cliente ]
+  ), 
+  by=numero_de_cliente ]
   
   #eliminamos el numero de cliente (lag y lead unicas 2 columnas previas en tbl
   tbl[ , numero_de_cliente := NULL ]
@@ -152,17 +152,19 @@ apply_fixzerosnext <- function( dataset )
 PARAM  <- list()
 
 ## PARAMETROS A COMPLETAR:
-PARAM$experimento  <- "01FixData"
+#PARAM$experimento  <- "01FixData"
 PARAM$dataset  <- "./datasets/competencia_02_adds.csv.gz"
-setwd( "D:/OneDrive/! DM en Econ y Fin 2023" )
+setwd("~/buckets/b1")
 
 #------------------------------------------------------------------------------
 #cargo el dataset
 dataset  <- fread( PARAM$dataset )
 
 #creo la carpeta donde va el experimento
-dir.create( paste0( "./exp/", PARAM$experimento, "/"), showWarnings = FALSE )
-setwd(paste0( "./exp/", PARAM$experimento, "/"))   #Establezco el Working Directory DEL EXPERIMENTO
+#dir.create( paste0( "./exp/", PARAM$experimento, "/"), showWarnings = FALSE )
+#setwd(paste0( "./exp/", PARAM$experimento, "/"))   #Establezco el Working Directory DEL EXPERIMENTO
+
+
 
 #ordeno el dataset para aplicar luego los fixes
 setorder( dataset, numero_de_cliente, foto_mes )
@@ -180,13 +182,11 @@ dataset[  , internet := NULL ]
 
 #------------------------------------------------------------------------------
 #EXPORTO el dataset a un .csv
+setwd("~/buckets/b1/datasets/")
 fwrite( dataset,
-        file=  "/competencia02_fix.csv.gz",
+        file=  "competencia02_fix.csv.gz",
         logical01= TRUE,
         sep= "," )
-
-getwd()
-
 
 
 
