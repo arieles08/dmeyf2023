@@ -4,8 +4,8 @@
 
 
 # limpio la memoria
-rm(list = ls()) # remove all objects
-gc() # garbage collection
+#rm(list = ls()) # remove all objects
+#gc() # garbage collection
 
 require("data.table")
 require("lightgbm")
@@ -27,11 +27,11 @@ PARAM$input$future <- c(202107) # meses donde se aplica el modelo
 PARAM$finalmodel$semilla <- 997751
 
 # hiperparametros intencionalmente NO optimos
-PARAM$finalmodel$optim$num_iterations <- 730
-PARAM$finalmodel$optim$learning_rate <- 0.0323601846272594
-PARAM$finalmodel$optim$feature_fraction <- 0.909773795582897
-PARAM$finalmodel$optim$min_data_in_leaf <- 4637
-PARAM$finalmodel$optim$num_leaves <- 667
+PARAM$finalmodel$optim$num_iterations <- 627
+PARAM$finalmodel$optim$learning_rate <- 0.0712911346531473
+PARAM$finalmodel$optim$feature_fraction <- 0.311282494728803
+PARAM$finalmodel$optim$min_data_in_leaf <- 14301
+PARAM$finalmodel$optim$num_leaves <- 1004
 
 
 # Hiperparametros FIJOS de  lightgbm
@@ -73,7 +73,7 @@ PARAM$finalmodel$lgb_basicos <- list(
 setwd("~/buckets/b1")
 
 # cargo el dataset donde voy a entrenar
-dataset <- fread(PARAM$input$dataset, stringsAsFactors = TRUE)
+#dataset <- fread(PARAM$input$dataset, stringsAsFactors = TRUE)
 
 
 # Catastrophe Analysis  -------------------------------------------------------
@@ -100,7 +100,7 @@ dataset[, clase01 := ifelse(clase_ternaria %in% c("BAJA+2", "BAJA+1"), 1L, 0L)]
 #--------------------------------------
 
 # los campos que se van a utilizar
-campos_buenos <- setdiff(colnames(dataset), c("clase_ternaria", "clase01"))
+campos_buenos <- setdiff(colnames(dataset), c("clase_ternaria", "clase01", "clase_gral_n", "clase_gral"))
 
 #--------------------------------------
 
